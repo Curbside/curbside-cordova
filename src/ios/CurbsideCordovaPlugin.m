@@ -23,50 +23,91 @@
     [sdksession application:[UIApplication sharedApplication] didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (NSString*)jsonEncode:(id)data {
-    NSError * err;
-    NSData * jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&err];
-    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+- (NSString*)stringEncode:(NSString *)value {
+    return [NSString stringWithFormat:@"\"%@\"", [value stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
+}
+
+- (NSString*)dateEncode:(NSDate *)date {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"EEE, dd MMM yyyy HH:mm:ss ZZZ";
+    return [self stringEncode:[formatter stringFromDate:date]];
+}
+
+- (NSString*)userStatusEncode:(CSUserStatus)status {
+    switch(status) {
+        case CSUserStatusArrived:
+        return @"\"arrived\"";
+        break;
+        case CSUserStatusInTransit:
+        return @"\"inTransit\"";
+        break;
+        case CSUserStatusApproaching:
+        return @"\"approaching\"";
+        break;
+        case CSUserStatusUserInitiatedArrived:
+        return @"\"userInitiatedArrived\"";
+        break;
+        default:
+        return @"\"unknown\"";
+    }
+}
+
+- (NSString*)tripEncode:(CSTripInfo *)trip {
+    return [NSString stringWithFormat:@"{trackToken: %@, startDate:%@, destID: %@}", [self stringEncode:trip.trackToken], [self dateEncode:trip.startDate], [self stringEncode:trip.destID]];
+}
+
+- (NSString*)tripsEncode:(NSArray<CSTripInfo *> *)trips {
+    NSMutableArray *stringArray = [[NSMutableArray alloc] init];
+    for(int i=0; i< trips.count; i++){
+        [stringArray addObject:[self tripEncode:[trips objectAtIndex:i]]];
+    }
+    return [NSString stringWithFormat:@"[%@]", [stringArray componentsJoinedByString:@","]];
+}
+
+- (NSString*)siteEncode:(CSSite *)site {
+    return [NSString stringWithFormat:@"{siteIdentifier: %@, distanceFromSite:%d, userStatus: %@, trips: %@}", [self stringEncode:site.siteIdentifier], site.distanceFromSite, [self userStatusEncode:site.userStatus], [self tripsEncode:site.tripInfos]];
+}
+
+- (NSString*)sitesEncode:(NSSet<CSSite *> *)sites {
+    NSArray *allSites = [sites allObjects];
+    NSMutableArray *stringArray = [[NSMutableArray alloc] init];
+    for(int i=0; i< allSites.count; i++){
+        [stringArray addObject:[self siteEncode:[allSites objectAtIndex:i]]];
+    }
+    return [NSString stringWithFormat:@"[%@]", [stringArray componentsJoinedByString:@","]];
 }
 
 - (void)session:(CSUserSession *)session canNotifyMonitoringSessionUserAtSite:(CSSite *)site {
-    NSString *code = [NSString stringWithFormat:@"window.Curbside.canNotifyMonitoringSessionUserAtSite(%@);",[self jsonEncode:site]];
+    NSString *code = [NSString stringWithFormat:@"Curbside && Curbside._canNotifyMonitoringSessionUserAtSite(%@);",[self siteEncode:site]];
     [self.commandDelegate evalJs:code];
 }
 
 - (void)session:(CSUserSession *)session userApproachingSite:(CSSite *)site {
-    NSString *code = [NSString stringWithFormat:@"window.Curbside.userApproachingSite(%@);",[self jsonEncode:site]];
+    NSString *code = [NSString stringWithFormat:@"Curbside && Curbside._userApproachingSite(%@);",[self siteEncode:site]];
     [self.commandDelegate evalJs:code];
 }
 
 - (void)session:(CSUserSession *)session userArrivedAtSite:(CSSite *)site {
-    NSString *code = [NSString stringWithFormat:@"window.Curbside.userArrivedAtSite(%@);",[self jsonEncode:site]];
+    NSString *code = [NSString stringWithFormat:@"Curbside && Curbside._userArrivedAtSite(%@);",[self siteEncode:site]];
     [self.commandDelegate evalJs:code];
     
 }
 
 - (void)session:(CSUserSession *)session encounteredError:(NSError *)error forOperation:(CSUserSessionAction)customerSessionAction {
-    NSString *code = [NSString stringWithFormat:@"window.Curbside.encounteredError(%@);",[self jsonEncode:error.description]];
+    NSString *code = [NSString stringWithFormat:@"Curbside && Curbside._encounteredError(%@);", [self stringEncode:error.description]];
     [self.commandDelegate evalJs:code];
 }
 
 - (void)session:(CSUserSession *)session updatedTrackedSites:(NSSet<CSSite *> *)trackedSites {
-    NSString *code = [NSString stringWithFormat:@"window.Curbside && window.Curbside.updatedTrackedSites(%@);",[self jsonEncode:trackedSites]];
+    NSString *code = [NSString stringWithFormat:@"Curbside && Curbside._updatedTrackedSites(%@);",[self sitesEncode:trackedSites]];
     [self.commandDelegate evalJs:code];
 }
 
 - (void)setTrackingIdentifier:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
     NSString* trackingIdentifier = [command.arguments objectAtIndex:0];
-    
-    if (trackingIdentifier != nil) {
-        [CSUserSession currentSession].trackingIdentifier = trackingIdentifier;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Arg was null"];
-    }
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [CSUserSession currentSession].trackingIdentifier = trackingIdentifier;
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
 - (void)startTripToSiteWithIdentifier:(CDVInvokedUrlCommand*)command
