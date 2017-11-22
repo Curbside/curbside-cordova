@@ -63,35 +63,35 @@ Example using config.xml
 <script type="text/javascript">
 document.addEventListener("deviceready", function() {
   /**
-   * Will be trigger when the user is near a site where the associate can be notified of the user arrival.
+   * Will be triggered when the user is near a site where the associate can be notified of the user arrival.
    */
   Curbside.on("canNotifyMonitoringSessionUserAtSite", function(site){
     // Do something
   })
 
   /**
-   * Will be trigger when the user is approaching a site which is currently tracked for a trip.
+   * Will be triggered when the user is approaching a site which is currently tracked for a trip.
    */
   Curbside.on("userApproachingSite", function(site){
     // Do something
   })
 
   /**
-   * Will be trigger when the user has arrived at a site which is currently tracked for a trip.
+   * Will be triggered when the user has arrived at a site which is currently tracked for a trip.
    */
   Curbside.on("userArrivedAtSite", function(site){
     // Do something
   })
 
   /**
-   * Will be trigger when an error encountered.
+   * Will be triggered when an error is encountered.
    */
   Curbside.on("encounteredError", function(error){
     // Do something
   })
 
   /**
-   * Will be trigger when trackedSites are updated.
+   * Will be triggered when trackedSites are updated.
    */
   Curbside.on("updatedTrackedSites", function(sites){
     // Do something
