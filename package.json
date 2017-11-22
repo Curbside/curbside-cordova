@@ -1,0 +1,17 @@
+{
+    "name": "curbside-cordova",
+    "version": "3.0.0",
+    "cordova": {
+        "id": "curbside-cordova",
+        "platforms": ["android", "ios"]
+    },
+    "scripts": {},
+    "description": "Curbside Cordova Plugin",
+    "author": {
+        "email": "alex.pare.inc@gmail.com",
+        "name": "Alexandre Paré"
+    },
+    "repository": {
+        "url": "https://github.com/curbside/curbside-cordova"
+    }
+}
