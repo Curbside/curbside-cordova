@@ -1,0 +1,158 @@
+/**
+ */
+package com.curbside;
+
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.util.ArraySet;
+import android.util.Log;
+
+import com.curbside.sdk.CSSite;
+import com.curbside.sdk.CSUserSession;
+import com.curbside.sdk.OperationStatus;
+import com.curbside.sdk.OperationType;
+import com.curbside.sdk.credentialprovider.TokenCurbsideCredentialProvider;
+import com.curbside.sdk.event.Event;
+import com.curbside.sdk.event.Path;
+import com.curbside.sdk.event.Status;
+import com.curbside.sdk.event.Type;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+
+import rx.functions.Action1;
+
+public class CurbsideCordovaPlugin extends CordovaPlugin {
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    private Activity activity;
+    private CallbackContext eventListenerCallbackContext;
+
+    @Override
+    public void initialize(final CordovaInterface cordova, final CordovaWebView webView) {
+        super.initialize(cordova, webView);
+
+        Context context = webView.getContext();
+
+        activity = cordova.getActivity();
+        ApplicationInfo applicationInfo = null;
+        try {
+            applicationInfo = activity.getPackageManager().getApplicationInfo(activity.getPackageName(), PackageManager.GET_META_DATA);
+        } catch (NameNotFoundException e) {
+        }
+
+        boolean needRequestPermission = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+
+        if (needRequestPermission) {
+            String[] permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(cordova.getActivity(), permissions, PERMISSION_REQUEST_CODE);
+        }
+
+        // Request permissions results
+        String USAGE_TOKEN = applicationInfo.metaData.getString("com.curbside.USAGE_TOKEN");
+        CSUserSession.init(webView.getContext(), new TokenCurbsideCredentialProvider(USAGE_TOKEN));
+
+        final CurbsideCordovaPlugin ccPlugin = this;
+
+        CSUserSession
+                .getInstance()
+                .getEventBus()
+                .getObservable(Path.USER, Type.REGISTER_TRACKING_ID)
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        Log.i(event.type.toString(), event.status.toString());
+
+                    }
+                });
+    }
+
+    private void suscribe(Type type, final String eventName) {
+        final CurbsideCordovaPlugin ccPlugin = this;
+        CSUserSession
+                .getInstance()
+                .getEventBus()
+                .getObservable(Path.USER, type)
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        try {
+                            JSONObject result = new JSONObject();
+                            result.put("event", eventName);
+                            if (event.object != null) {
+                                result.put("result", event.object);
+                            }
+                            PluginResult dataResult = new PluginResult( event.status == Status.SUCCESS ? PluginResult.Status.OK : PluginResult.Status.ERROR, result);
+                            dataResult.setKeepCallback(true);
+                            ccPlugin.eventListenerCallbackContext.success(result);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        if (action.equals("eventListener")) {
+            this.eventListenerCallbackContext = callbackContext;
+            suscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
+        } else {
+            OperationStatus status = null;
+            if (action.equals("setTrackingIdentifier")) {
+                String trackingIdentifier = args.getString(0);
+                if(trackingIdentifier != null){
+                    status = CSUserSession.getInstance().registerTrackingIdentifier(trackingIdentifier);
+                }else {
+                    CSUserSession.getInstance().unregisterTrackingIdentifier();
+                }
+            } else if (action.equals("startTripToSiteWithIdentifier")) {
+                String siteID = args.getString(0);
+                String trackToken = args.getString(1);
+                status = CSUserSession.getInstance().startTripToSiteWithIdentifier(siteID, trackToken);
+            } else if (action.equals("completeTripToSiteWithIdentifier")) {
+                String siteID = args.getString(0);
+                String trackToken = args.getString(1);
+                CSUserSession.getInstance().completeTripToSiteWithIdentifier(siteID, trackToken);
+                status = new OperationStatus(OperationType.SUCCESS, "completeTripToSiteWithIdentifier");
+            } else if (action.equals("completeAllTrips")) {
+                CSUserSession.getInstance().completeAllTrips();
+                status = new OperationStatus(OperationType.SUCCESS, "completeAllTrips");
+            } else if (action.equals("cancelTripToSiteWithIdentifier")) {
+                String siteID = args.getString(0);
+                String trackToken = args.getString(1);
+                CSUserSession.getInstance().cancelTripToSiteWithIdentifier(siteID, trackToken);
+                status = new OperationStatus(OperationType.SUCCESS, "cancelTripToSiteWithIdentifier");
+            } else if (action.equals("cancelAllTrips")) {
+                CSUserSession.getInstance().cancelAllTrips();
+                status = new OperationStatus(OperationType.SUCCESS, "cancelAllTrips");
+            }
+
+            if (status == null || status.operationType == OperationType.SUCCESS) {
+                callbackContext.success(status != null? status.statusMessage : null);
+            } else {
+                callbackContext.error(status.statusMessage);
+            }
+        }
+        return true;
+    }
+
+}
