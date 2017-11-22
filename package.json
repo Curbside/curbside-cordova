@@ -1,0 +1,12 @@
+{
+    "name": "curbside-cordova",
+    "version": "1.0.0",
+    "cordova": {
+        "id": "curbside-cordova",
+        "platforms": ["android", "ios"]
+    },
+    "scripts": {
+        "before_plugin_add": "echo test"
+    },
+    "description": "Curbside Cordova Plugin"
+}
