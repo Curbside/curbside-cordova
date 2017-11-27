@@ -4,9 +4,14 @@
 
 @import Curbside;
 
-@implementation CurbsideCordovaPlugin
+@interface CurbsideCordovaPlugin () <CSUserSessionDelegate>
+{
+    NSString* _eventListenerCallbackId;
+}
 
-NSString* eventListenerCallbackId;
+@end
+
+@implementation CurbsideCordovaPlugin
 
 - (void)pluginInitialize {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishLaunching:) name:UIApplicationDidFinishLaunchingNotification object:nil];
@@ -20,7 +25,7 @@ NSString* eventListenerCallbackId;
     NSString *usageToken = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Curbside Usage Token"];
 
     CSUserSession *sdksession = [CSUserSession createSessionWithUsageToken:usageToken delegate:self];
-    NSDictionary *launchOptions = notification.userInfo[UIApplicationLaunchOptionsLocationKey];
+    NSDictionary *launchOptions = notification.userInfo;
     [sdksession application:[UIApplication sharedApplication] didFinishLaunchingWithOptions:launchOptions];
 }
 
@@ -103,7 +108,7 @@ NSString* eventListenerCallbackId;
 }
 
 - (void)eventListener:(CDVInvokedUrlCommand*)command {
-    eventListenerCallbackId = command.callbackId;
+    _eventListenerCallbackId = command.callbackId;
 }
 
 - (void)sendSuccessEvent:(NSString*) event withResult:(id) result {
@@ -111,14 +116,14 @@ NSString* eventListenerCallbackId;
     [message setValue:event forKey:@"event"];
     [message setValue:result forKey:@"result"];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:eventListenerCallbackId];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:_eventListenerCallbackId];
 }
 
 - (void)sendErrorEvent:(NSString*) error {
     NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
     [message setValue:error forKey:@"result"];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:message];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:eventListenerCallbackId];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:_eventListenerCallbackId];
 }
 
 
