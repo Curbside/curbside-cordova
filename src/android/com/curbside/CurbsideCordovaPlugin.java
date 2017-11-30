@@ -15,7 +15,9 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.curbside.sdk.CSSite;
+import com.curbside.sdk.CSTripInfo;
 import com.curbside.sdk.CSUserSession;
+import com.curbside.sdk.CSUserStatus;
 import com.curbside.sdk.OperationStatus;
 import com.curbside.sdk.OperationType;
 import com.curbside.sdk.credentialprovider.TokenCurbsideCredentialProvider;
@@ -32,9 +34,11 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -86,6 +90,47 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                 });
     }
 
+    private Object jsonEncode(Object object) throws JSONException {
+        if (object instanceof Collection) {
+            JSONArray result = new JSONArray();
+            for (Object item : (Collection) object) {
+                result.put(jsonEncode(item));
+            }
+            return result;
+        } else if (object instanceof CSSite) {
+            CSSite site = (CSSite) object;
+            JSONObject result = new JSONObject();
+            result.put("siteIdentifier", site.getSiteIdentifier());
+            result.put("distanceFromSite", site.getDistanceFromSite());
+            result.put("userStatus", jsonEncode(site.getUserStatus()));
+            result.put("trips", jsonEncode(site.getTripInfos()));
+            return result;
+        } else if (object instanceof CSUserStatus) {
+            CSUserStatus userStatus = (CSUserStatus) object;
+            switch(userStatus) {
+                case ARRIVED:
+                    return "arrived";
+                case IN_TRANSIT:
+                    return "inTransit";
+                case APPROACHING:
+                    return "approaching";
+                case INITIATED_ARRIVED:
+                    return "userInitiatedArrived";
+                case UNKNOWN:
+                    return "unknown";
+            }
+            return null;
+        } else if (object instanceof CSTripInfo) {
+            CSTripInfo tripInfo = (CSTripInfo) object;
+            JSONObject result = new JSONObject();
+            result.put("trackToken", tripInfo.getTrackToken());
+            result.put("startDate", tripInfo.getStartDate());
+            result.put("destID", tripInfo.getDestId());
+            return result;
+        }
+        return object;
+    }
+
     private void suscribe(Type type, final String eventName) {
         final CurbsideCordovaPlugin ccPlugin = this;
         CSUserSession
@@ -99,7 +144,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                             JSONObject result = new JSONObject();
                             result.put("event", eventName);
                             if (event.object != null) {
-                                result.put("result", event.object);
+                                result.put("result", jsonEncode(event.object));
                             }
                             PluginResult dataResult = new PluginResult( event.status == Status.SUCCESS ? PluginResult.Status.OK : PluginResult.Status.ERROR, result);
                             dataResult.setKeepCallback(true);
