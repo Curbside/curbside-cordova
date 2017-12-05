@@ -246,7 +246,7 @@ document.addEventListener("deviceready", function() {
 
 ### Promise
 
-All functions return a promise as alternative to callback
+All functions return a promise as an alternative to a callback.
 
 * setTrackingIdentifier
 * startTripToSiteWithIdentifier
@@ -256,3 +256,15 @@ All functions return a promise as alternative to callback
 * cancelTripToSiteWithIdentifier
 * getTrackingIdentifier
 * getTrackedSites
+
+Promise can be used like this:
+
+```js
+Curbside.getTrackedSites
+    .then(function(sites) {
+        // Do something
+    })
+    .catch(function(error) {
+        // Do something
+    });
+```
