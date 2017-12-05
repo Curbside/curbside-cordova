@@ -188,40 +188,71 @@ document.addEventListener("deviceready", function() {
    * When the user logs out, set this to nil, which will inturn end the user session or monitoring session.
    * Note: The maximum length of the trackingIdentifier is 36 characters.
   */
-  Curbside.setTrackingIdentifier("USER_UNIQUE_TRACKING_ID");
+  Curbside.setTrackingIdentifier("USER_UNIQUE_TRACKING_ID", function(error){
+
+  });
 
   /**
    * Start a trip tracking the user to the site identified by the siteID. Call this method when
    * the application thinks its appropriate to start tracking the user eg. Order is ready to be picked up at
    * the site. This information is persisted across relaunch.
    */
-  Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN");
+  Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
+
+  });
 
   /**
    * Completes the trip for the user to the site identified by the siteID with the given trackToken.
    * If no trackToken is specified, then *all* trips to this site  will be completed.
    * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
    */
-  Curbside.completeTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN");
+  Curbside.completeTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
+
+  });
 
   /**
    * This method would complete all trips for this user across all devices.
    * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
    */
-  curbside.completeAllTrips()
+  curbside.completeAllTrips(function(error){
+
+  });
 
   /**
    * Cancels the trip for the user to the given site identified by the siteID with the given trackToken.
    * If no trackToken is set, then *all* trips to this site are cancelled.
    * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
    */
-  Curbside.cancelTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN")
+  Curbside.cancelTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
+
+  });
 
   /**
-   * This method will cancels all trips for all sites for the user.
-   * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
+   * Returns an trackingId of the currently tracked user
    */
-  Curbside.cancelAllTrips()
+  Curbside.getTrackingIdentifier(function(error, sites){
+
+  });
+
+  /**
+   * Returns an trackingId of the currently tracked user
+   */
+  Curbside.getTrackedSites(function(error, sites){
+
+  });
 });
 </script>
 ```
+
+### Promise
+
+All functions return a promise as alternative to callback
+
+* setTrackingIdentifier
+* startTripToSiteWithIdentifier
+* startTripToSiteWithIdentifier
+* completeTripToSiteWithIdentifier
+* completeAllTrips
+* cancelTripToSiteWithIdentifier
+* getTrackingIdentifier
+* getTrackedSites

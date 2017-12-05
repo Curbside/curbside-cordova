@@ -21,9 +21,9 @@
     self.locationManager = [[CLLocationManager alloc] init];
     if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
         [self.locationManager requestAlwaysAuthorization];
-
+    
     NSString *usageToken = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Curbside Usage Token"];
-
+    
     CSUserSession *sdksession = [CSUserSession createSessionWithUsageToken:usageToken delegate:self];
     NSDictionary *launchOptions = notification.userInfo;
     [sdksession application:[UIApplication sharedApplication] didFinishLaunchingWithOptions:launchOptions];
@@ -32,19 +32,19 @@
 - (NSString*)userStatusEncode:(CSUserStatus)status {
     switch(status) {
         case CSUserStatusArrived:
-        return @"\"arrived\"";
-        break;
+            return @"\"arrived\"";
+            break;
         case CSUserStatusInTransit:
-        return @"\"inTransit\"";
-        break;
+            return @"\"inTransit\"";
+            break;
         case CSUserStatusApproaching:
-        return @"\"approaching\"";
-        break;
+            return @"\"approaching\"";
+            break;
         case CSUserStatusUserInitiatedArrived:
-        return @"\"userInitiatedArrived\"";
-        break;
+            return @"\"userInitiatedArrived\"";
+            break;
         default:
-        return @"\"unknown\"";
+            return @"\"unknown\"";
     }
 }
 
@@ -187,4 +187,15 @@
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
+- (void)getTrackingIdentifier:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[CSUserSession currentSession].trackingIdentifier];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)getTrackedSites:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:[self sitesEncode:[CSUserSession currentSession].trackedSites]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 @end
+

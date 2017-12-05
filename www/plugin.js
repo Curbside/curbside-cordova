@@ -15,42 +15,54 @@ function execCb(name, cb) {
     for (var i = 2; i < arguments.length; i++) {
         args.push(arguments[i]);
     }
-    exec(
-        function(params) {
-            cb && cb(null, params);
-        },
-        function(error) {
-            cb && cb(error);
-        },
-        PLUGIN_NAME,
-        name,
-        args,
-    );
+    return new Promise(function(resolve, reject) {
+        exec(
+            function(params) {
+                cb && cb(null, params);
+                resolve(params);
+            },
+            function(error) {
+                cb && cb(error);
+                reject(error);
+            },
+            PLUGIN_NAME,
+            name,
+            args,
+        );
+    });
 }
 
 var Curbside = {
     setTrackingIdentifier: function(trackingIdentifier, cb) {
-        execCb("setTrackingIdentifier", cb, trackingIdentifier);
+        return execCb("setTrackingIdentifier", cb, trackingIdentifier);
     },
 
     startTripToSiteWithIdentifier: function(siteID, trackToken, cb) {
-        exec("startTripToSiteWithIdentifier", cb, siteID, trackToken);
+        return execCb("startTripToSiteWithIdentifier", cb, siteID, trackToken);
     },
 
     completeTripToSiteWithIdentifier: function(siteID, trackToken, cb) {
-        execCb("completeTripToSiteWithIdentifier", cb, siteID, trackToken);
+        return execCb("completeTripToSiteWithIdentifier", cb, siteID, trackToken);
     },
 
     completeAllTrips: function(cb) {
-        execCb("completeAllTrips", cb);
+        return execCb("completeAllTrips", cb);
     },
 
     cancelTripToSiteWithIdentifier: function(siteID, trackToken, cb) {
-        execCb("cancelTripToSiteWithIdentifier", cb, siteID, trackToken);
+        return execCb("cancelTripToSiteWithIdentifier", cb, siteID, trackToken);
     },
 
     cancelAllTrips: function(cb) {
-        execCb("cancelAllTrips", cb);
+        return execCb("cancelAllTrips", cb);
+    },
+
+    getTrackingIdentifier: function(cb) {
+        return execCb("getTrackingIdentifier", cb);
+    },
+
+    getTrackedSites: function(cb) {
+        return execCb("getTrackedSites", cb);
     },
 
     on: function(event, listener) {
@@ -87,7 +99,7 @@ exec(
     function(args) {
         trigger(args.event, args.result);
     },
-    function() {
+    function(args) {
         trigger("encounteredError", args.result);
     },
     PLUGIN_NAME,

@@ -21,4 +21,8 @@
 
 - (void)cancelAllTrips:(CDVInvokedUrlCommand*)command;
 
+- (void)getTrackingIdentifier:(CDVInvokedUrlCommand*)command;
+
+- (void)getTrackedSites:(CDVInvokedUrlCommand*)command;
+
 @end

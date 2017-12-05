@@ -107,7 +107,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             return result;
         } else if (object instanceof CSUserStatus) {
             CSUserStatus userStatus = (CSUserStatus) object;
-            switch(userStatus) {
+            switch (userStatus) {
                 case ARRIVED:
                     return "arrived";
                 case IN_TRANSIT:
@@ -131,7 +131,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
         return object;
     }
 
-    private void subscribe(Type type, final String eventName) {
+    private void suscribe(Type type, final String eventName) {
         final CurbsideCordovaPlugin ccPlugin = this;
         CSUserSession
                 .getInstance()
@@ -146,7 +146,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                             if (event.object != null) {
                                 result.put("result", jsonEncode(event.object));
                             }
-                            PluginResult dataResult = new PluginResult( event.status == Status.SUCCESS ? PluginResult.Status.OK : PluginResult.Status.ERROR, result);
+                            PluginResult dataResult = new PluginResult(event.status == Status.SUCCESS ? PluginResult.Status.OK : PluginResult.Status.ERROR, result);
                             dataResult.setKeepCallback(true);
                             ccPlugin.eventListenerCallbackContext.success(result);
                         } catch (JSONException e) {
@@ -159,14 +159,18 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("eventListener")) {
             this.eventListenerCallbackContext = callbackContext;
-            subscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
+            suscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
+            suscribe(Type.APPROACHING_SITE, "userApproachingSite");
+            suscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
+            suscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
         } else {
             OperationStatus status = null;
+            Object result = null;
             if (action.equals("setTrackingIdentifier")) {
                 String trackingIdentifier = args.getString(0);
-                if(trackingIdentifier != null){
+                if (trackingIdentifier != null) {
                     status = CSUserSession.getInstance().registerTrackingIdentifier(trackingIdentifier);
-                }else {
+                } else {
                     CSUserSession.getInstance().unregisterTrackingIdentifier();
                 }
             } else if (action.equals("startTripToSiteWithIdentifier")) {
@@ -189,12 +193,24 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             } else if (action.equals("cancelAllTrips")) {
                 CSUserSession.getInstance().cancelAllTrips();
                 status = new OperationStatus(OperationType.SUCCESS, "cancelAllTrips");
+            } else if (action.equals("getTrackingIdentifier")) {
+                status = new OperationStatus(OperationType.SUCCESS, CSUserSession.getInstance().getTrackingIdentifier());
+            } else if (action.equals("getTrackedSites")) {
+                result = this.jsonEncode(CSUserSession.getInstance().getTrackedSites());
             }
 
-            if (status == null || status.operationType == OperationType.SUCCESS) {
-                callbackContext.success(status != null? status.statusMessage : null);
+            if (result instanceof JSONObject) {
+                callbackContext.success((JSONObject) result);
+            } else if (result instanceof JSONArray) {
+                callbackContext.success((JSONArray) result);
+            } else if (result instanceof String) {
+                callbackContext.success((String) result);
             } else {
-                callbackContext.error(status.statusMessage);
+                if (status == null || status.operationType == OperationType.SUCCESS) {
+                    callbackContext.success(status != null ? status.statusMessage : null);
+                } else {
+                    callbackContext.error(status.statusMessage);
+                }
             }
         }
         return true;
