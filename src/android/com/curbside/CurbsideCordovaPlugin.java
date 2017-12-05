@@ -131,7 +131,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
         return object;
     }
 
-    private void suscribe(Type type, final String eventName) {
+    private void subscribe(Type type, final String eventName) {
         final CurbsideCordovaPlugin ccPlugin = this;
         CSUserSession
                 .getInstance()
@@ -159,7 +159,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("eventListener")) {
             this.eventListenerCallbackContext = callbackContext;
-            suscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
+            subscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
         } else {
             OperationStatus status = null;
             if (action.equals("setTrackingIdentifier")) {
