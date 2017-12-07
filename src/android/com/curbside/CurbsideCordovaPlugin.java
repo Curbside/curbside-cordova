@@ -42,6 +42,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
+import rx.Subscriber;
+import rx.exceptions.OnErrorNotImplementedException;
 import rx.functions.Action1;
 
 public class CurbsideCordovaPlugin extends CordovaPlugin {
@@ -156,6 +158,45 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                 });
     }
 
+
+    private void listenNextEvent(final Type type, final CallbackContext callbackContext) {
+        Subscriber<Event> subscriber = new Subscriber<Event>() {
+            @Override
+            public final void onCompleted() {
+            }
+
+            @Override
+            public final void onError(Throwable e) {
+                throw new OnErrorNotImplementedException(e);
+            }
+
+            @Override
+            public final void onNext(Event event) {
+                Object result = event.object;
+                if(event.status == Status.SUCCESS) {
+                    if (result instanceof JSONObject) {
+                        callbackContext.success((JSONObject) result);
+                    } else if (result instanceof JSONArray) {
+                        callbackContext.success((JSONArray) result);
+                    } else if (result instanceof String) {
+                        callbackContext.success((String) result);
+                    } else {
+                        callbackContext.success();
+                    }
+                } else {
+                    callbackContext.error(event.object.toString());
+                }
+                unsubscribe();
+            }
+        };
+        CSUserSession
+                .getInstance()
+                .getEventBus()
+                .getObservable(Path.USER, type)
+                .subscribe(subscriber);
+    }
+
+
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("eventListener")) {
             this.eventListenerCallbackContext = callbackContext;
@@ -164,53 +205,40 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             suscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
             suscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
         } else {
-            OperationStatus status = null;
-            Object result = null;
             if (action.equals("setTrackingIdentifier")) {
                 String trackingIdentifier = args.getString(0);
                 if (trackingIdentifier != null) {
-                    status = CSUserSession.getInstance().registerTrackingIdentifier(trackingIdentifier);
+                    listenNextEvent(Type.REGISTER_TRACKING_ID, callbackContext);
+                    CSUserSession.getInstance().registerTrackingIdentifier(trackingIdentifier);
                 } else {
+                    listenNextEvent(Type.UNREGISTER_TRACKING_ID, callbackContext);
                     CSUserSession.getInstance().unregisterTrackingIdentifier();
                 }
             } else if (action.equals("startTripToSiteWithIdentifier")) {
                 String siteID = args.getString(0);
                 String trackToken = args.getString(1);
-                status = CSUserSession.getInstance().startTripToSiteWithIdentifier(siteID, trackToken);
+                listenNextEvent(Type.START_TRIP, callbackContext);
+                CSUserSession.getInstance().startTripToSiteWithIdentifier(siteID, trackToken);
             } else if (action.equals("completeTripToSiteWithIdentifier")) {
                 String siteID = args.getString(0);
                 String trackToken = args.getString(1);
+                listenNextEvent(Type.COMPLETE_TRIP, callbackContext);
                 CSUserSession.getInstance().completeTripToSiteWithIdentifier(siteID, trackToken);
-                status = new OperationStatus(OperationType.SUCCESS, "completeTripToSiteWithIdentifier");
             } else if (action.equals("completeAllTrips")) {
                 CSUserSession.getInstance().completeAllTrips();
-                status = new OperationStatus(OperationType.SUCCESS, "completeAllTrips");
+                listenNextEvent(Type.COMPLETE_ALL_TRIPS, callbackContext);
             } else if (action.equals("cancelTripToSiteWithIdentifier")) {
                 String siteID = args.getString(0);
                 String trackToken = args.getString(1);
+                listenNextEvent(Type.CANCEL_TRIP, callbackContext);
                 CSUserSession.getInstance().cancelTripToSiteWithIdentifier(siteID, trackToken);
-                status = new OperationStatus(OperationType.SUCCESS, "cancelTripToSiteWithIdentifier");
             } else if (action.equals("cancelAllTrips")) {
                 CSUserSession.getInstance().cancelAllTrips();
-                status = new OperationStatus(OperationType.SUCCESS, "cancelAllTrips");
+                listenNextEvent(Type.CANCEL_ALL_TRIPS, callbackContext);
             } else if (action.equals("getTrackingIdentifier")) {
-                status = new OperationStatus(OperationType.SUCCESS, CSUserSession.getInstance().getTrackingIdentifier());
+                callbackContext.success(CSUserSession.getInstance().getTrackingIdentifier());
             } else if (action.equals("getTrackedSites")) {
-                result = this.jsonEncode(CSUserSession.getInstance().getTrackedSites());
-            }
-
-            if (result instanceof JSONObject) {
-                callbackContext.success((JSONObject) result);
-            } else if (result instanceof JSONArray) {
-                callbackContext.success((JSONArray) result);
-            } else if (result instanceof String) {
-                callbackContext.success((String) result);
-            } else {
-                if (status == null || status.operationType == OperationType.SUCCESS) {
-                    callbackContext.success(status != null ? status.statusMessage : null);
-                } else {
-                    callbackContext.error(status.statusMessage);
-                }
+                callbackContext.success((JSONObject) jsonEncode(CSUserSession.getInstance().getTrackedSites()));
             }
         }
         return true;
