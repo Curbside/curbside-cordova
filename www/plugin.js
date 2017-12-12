@@ -8,6 +8,7 @@ var eventListeners = {
     userArrivedAtSite: [],
     encounteredError: [],
     updatedTrackedSites: [],
+    changedState: [],
 };
 
 function execCb(name, cb) {
@@ -66,6 +67,7 @@ var Curbside = {
     },
 
     on: function(event, listener) {
+        initEventListener();
         if (!(event in eventListeners)) {
             throw event + " doesn't exist";
         }
@@ -95,15 +97,22 @@ function trigger(event) {
     });
 }
 
-exec(
-    function(args) {
-        trigger(args.event, args.result);
-    },
-    function(args) {
-        trigger("encounteredError", args.result);
-    },
-    PLUGIN_NAME,
-    "eventListener",
-);
+var eventListenerStarted = false;
+
+function initEventListener() {
+    if (!eventListenerStarted) {
+        exec(
+            function(args) {
+                trigger(args.event, args.result);
+            },
+            function(args) {
+                trigger("encounteredError", args.result);
+            },
+            PLUGIN_NAME,
+            "eventListener",
+        );
+        eventListenerStarted = true;
+    }
+}
 
 module.exports = Curbside;

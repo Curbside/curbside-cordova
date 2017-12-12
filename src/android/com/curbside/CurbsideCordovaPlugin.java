@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -49,47 +50,25 @@ import rx.functions.Action1;
 public class CurbsideCordovaPlugin extends CordovaPlugin {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private Activity activity;
     private CallbackContext eventListenerCallbackContext;
+    private ArrayList<PluginResult> pluginResults = new ArrayList<PluginResult>();
 
     @Override
     public void initialize(final CordovaInterface cordova, final CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        Context context = webView.getContext();
-
-        activity = cordova.getActivity();
-        ApplicationInfo applicationInfo = null;
-        try {
-            applicationInfo = activity.getPackageManager().getApplicationInfo(activity.getPackageName(), PackageManager.GET_META_DATA);
-        } catch (NameNotFoundException e) {
-        }
-
-        boolean needRequestPermission = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-
-        if (needRequestPermission) {
-            String[] permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
-            ActivityCompat.requestPermissions(cordova.getActivity(), permissions, PERMISSION_REQUEST_CODE);
-        }
-
-        // Request permissions results
-        String USAGE_TOKEN = applicationInfo.metaData.getString("com.curbside.USAGE_TOKEN");
-        CSUserSession.init(webView.getContext(), new TokenCurbsideCredentialProvider(USAGE_TOKEN));
-
         final CurbsideCordovaPlugin ccPlugin = this;
 
-        CSUserSession
-                .getInstance()
-                .getEventBus()
-                .getObservable(Path.USER, Type.REGISTER_TRACKING_ID)
-                .subscribe(new Action1<Event>() {
-                    @Override
-                    public void call(Event event) {
-                        Log.i(event.type.toString(), event.status.toString());
 
-                    }
-                });
+        CSUserSession instance = CSUserSession.getInstance();
+        if (instance == null) {
+            throw new Error("CSUserSession must be initialized init");
+        }
+
+        suscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
+        suscribe(Type.APPROACHING_SITE, "userApproachingSite");
+        suscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
+        suscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
     }
 
     private Object jsonEncode(Object object) throws JSONException {
@@ -135,29 +114,38 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
 
     private void suscribe(Type type, final String eventName) {
         final CurbsideCordovaPlugin ccPlugin = this;
-        CSUserSession
-                .getInstance()
-                .getEventBus()
-                .getObservable(Path.USER, type)
-                .subscribe(new Action1<Event>() {
-                    @Override
-                    public void call(Event event) {
-                        try {
-                            JSONObject result = new JSONObject();
-                            result.put("event", eventName);
-                            if (event.object != null) {
-                                result.put("result", jsonEncode(event.object));
-                            }
-                            PluginResult dataResult = new PluginResult(event.status == Status.SUCCESS ? PluginResult.Status.OK : PluginResult.Status.ERROR, result);
-                            dataResult.setKeepCallback(true);
-                            ccPlugin.eventListenerCallbackContext.success(result);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-    }
+        Subscriber<Event> subscriber = new Subscriber<Event>() {
+            @Override
+            public final void onCompleted() {
+            }
 
+            @Override
+            public final void onError(Throwable e) {
+                throw new OnErrorNotImplementedException(e);
+            }
+
+            @Override
+            public final void onNext(Event event) {
+                try {
+                    JSONObject result = new JSONObject();
+                    result.put("event", eventName);
+                    if (event.object != null) {
+                        result.put("result", jsonEncode(event.object));
+                    }
+                    PluginResult dataResult = new PluginResult(event.status == Status.SUCCESS ? PluginResult.Status.OK : PluginResult.Status.ERROR, result);
+                    dataResult.setKeepCallback(true);
+                    if (ccPlugin.eventListenerCallbackContext != null) {
+                        ccPlugin.eventListenerCallbackContext.sendPluginResult(dataResult);
+                    } else {
+                        pluginResults.add(dataResult);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        listenEvent(type, subscriber);
+    }
 
     private void listenNextEvent(final Type type, final CallbackContext callbackContext) {
         Subscriber<Event> subscriber = new Subscriber<Event>() {
@@ -173,7 +161,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             @Override
             public final void onNext(Event event) {
                 Object result = event.object;
-                if(event.status == Status.SUCCESS) {
+                if (event.status == Status.SUCCESS) {
                     if (result instanceof JSONObject) {
                         callbackContext.success((JSONObject) result);
                     } else if (result instanceof JSONArray) {
@@ -189,6 +177,10 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                 unsubscribe();
             }
         };
+        listenEvent(type, subscriber);
+    }
+
+    private void listenEvent(final Type type, final Subscriber<Event> subscriber) {
         CSUserSession
                 .getInstance()
                 .getEventBus()
@@ -200,10 +192,10 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("eventListener")) {
             this.eventListenerCallbackContext = callbackContext;
-            suscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
-            suscribe(Type.APPROACHING_SITE, "userApproachingSite");
-            suscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
-            suscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
+            for (PluginResult pluginResult : pluginResults) {
+                callbackContext.sendPluginResult(pluginResult);
+            }
+            pluginResults.clear();
         } else {
             if (action.equals("setTrackingIdentifier")) {
                 String trackingIdentifier = args.getString(0);

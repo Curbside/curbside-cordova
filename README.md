@@ -9,28 +9,33 @@ This plugin is a wrapper for [Curbside SDK](https://developer.curbside.com/docs/
 _Stable version(npm)_
 
 ```bash
-cordova plugins add curbside-cordova \
-    --variable USAGE_TOKEN="..."
+cordova plugins add curbside-cordova
 ```
 
 _Develop version_
 
 ```bash
-cordova plugin add https://github.com/Curbside/curbside-cordova.git \
-    --variable USAGE_TOKEN="..."
-```
-
-If you re-install the plugin, remove the plugin then add
-
-```bash
-cordova plugin rm curbside-cordova
-cordova plugin add curbside-cordova \
-    --variable USAGE_TOKEN="..."
+cordova plugin add https://github.com/Curbside/curbside-cordova.git
 ```
 
 ### Ios
 
-#### Enable Background Modes
+In `platforms/ios/YOUR_PROJECT/Classes/AppDelegate.m`
+
+* Add on top
+
+```objc
+@import Curbside;
+```
+
+* Add at the end of `-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions`
+
+```objc
+  CSUserSession *sdksession = [CSUserSession createSessionWithUsageToken:@"USAGE_TOKEN" delegate:nil];
+  [sdksession application:application didFinishLaunchingWithOptions:launchOptions];
+```
+
+Enable Background Modes
 
 1. From the Project Navigator, select your project.
 2. Select your target.
@@ -71,7 +76,7 @@ pod install
 
 ### Android
 
-#### Add Curbside sdk maven url
+Add Curbside sdk maven url
 
 In your project, edit the file `platforms/android/build.gradle`.
 
@@ -112,6 +117,26 @@ Otherwise you will get:
            project :
 ```
 
+In `platforms/android/src/main/java/com/YOUR_PROJECT/MainActivity.java` add your Usage
+token and permission notification
+
+```java
+    private static String USAGE_TOKEN = "USAGE_TOKEN";
+    private static final int PERMISSION_REQUEST_CODE = 1;
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        CSUserSession.init(this, new TokenCurbsideCredentialProvider(USAGE_TOKEN));
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            String[] permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
+        }
+    }
+```
+
 ## Configuration
 
 You can also configure the following variables to customize the iOS location plist entries
@@ -125,7 +150,6 @@ Example using the Cordova CLI
 
 ```bash
 cordova plugin add curbside-cordova \
-    --variable USAGE_TOKEN="..."
     --variable LOCATION_WHEN_IN_USE_DESCRIPTION="My custom when in use message" \
     --variable LOCATION_ALWAYS_USAGE_DESCRIPTION="My custom always usage message"
 ```
@@ -134,7 +158,6 @@ Example using config.xml
 
 ```xml
 <plugin name="curbside-cordova" spec="3.0.0">
-    <variable name="USAGE_TOKEN" value="YOUR_USAGE_TOKEN_IS_HERE" />
     <variable name="LOCATION_WHEN_IN_USE_DESCRIPTION" value="My custom when in use message" />
     <variable name="LOCATION_ALWAYS_USAGE_DESCRIPTION" value="My custom always usage message" />
 </plugin>
