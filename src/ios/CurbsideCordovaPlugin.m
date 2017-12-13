@@ -159,13 +159,19 @@
 
 - (void)setTrackingIdentifier:(CDVInvokedUrlCommand*)command {
     NSString* trackingIdentifier = [command.arguments objectAtIndex:0];
-    [CSUserSession currentSession].trackingIdentifier = trackingIdentifier;
-    CSSessionState sessionState = [CSUserSession currentSession].sessionState;
-    
-    if (sessionState == CSSessionStateValid || sessionState == CSSessionStateAuthenticated) {
-        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
+    if (trackingIdentifier == nil && [CSUserSession currentSession].trackingIdentifier == nil){
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackingIdentifierAlreadyNull"] callbackId:command.callbackId];
+    } else if (trackingIdentifier != nil && [CSUserSession currentSession].trackingIdentifier != nil){
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackingIdentifierAlreadySet"] callbackId:command.callbackId];
     } else {
-        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
+        [CSUserSession currentSession].trackingIdentifier = trackingIdentifier;
+        CSSessionState sessionState = [CSUserSession currentSession].sessionState;
+        
+        if (sessionState == CSSessionStateValid || sessionState == CSSessionStateAuthenticated) {
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
+        } else {
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
+        }
     }
 }
 
