@@ -65,10 +65,10 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             throw new Error("CSUserSession must be initialized init");
         }
 
-        suscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
-        suscribe(Type.APPROACHING_SITE, "userApproachingSite");
-        suscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
-        suscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
+        subscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
+        subscribe(Type.APPROACHING_SITE, "userApproachingSite");
+        subscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
+        subscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
     }
 
     private Object jsonEncode(Object object) throws JSONException {
@@ -112,7 +112,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
         return object;
     }
 
-    private void suscribe(Type type, final String eventName) {
+    private void subscribe(Type type, final String eventName) {
         final CurbsideCordovaPlugin ccPlugin = this;
         Subscriber<Event> subscriber = new Subscriber<Event>() {
             @Override
