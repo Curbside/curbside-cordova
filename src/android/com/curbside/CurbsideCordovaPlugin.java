@@ -200,19 +200,11 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             if (action.equals("setTrackingIdentifier")) {
                 String trackingIdentifier = args.getString(0);
                 if (trackingIdentifier != null) {
-                    if(CSUserSession.getInstance().getTrackingIdentifier() != null){
-                        callbackContext.error("trackingIdentifierAlreadySet");
-                    }else {
-                        listenNextEvent(Type.REGISTER_TRACKING_ID, callbackContext);
-                        CSUserSession.getInstance().registerTrackingIdentifier(trackingIdentifier);
-                    }
+                    listenNextEvent(Type.REGISTER_TRACKING_ID, callbackContext);
+                    CSUserSession.getInstance().registerTrackingIdentifier(trackingIdentifier);
                 } else {
-                    if(CSUserSession.getInstance().getTrackingIdentifier() != null){
-                        callbackContext.error("trackingIdentifierAlreadyNull");
-                    } else {
-                        listenNextEvent(Type.UNREGISTER_TRACKING_ID, callbackContext);
-                        CSUserSession.getInstance().unregisterTrackingIdentifier();
-                    }
+                    listenNextEvent(Type.UNREGISTER_TRACKING_ID, callbackContext);
+                    CSUserSession.getInstance().unregisterTrackingIdentifier();
                 }
             } else if (action.equals("startTripToSiteWithIdentifier")) {
                 String siteID = args.getString(0);

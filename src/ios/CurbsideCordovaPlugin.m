@@ -20,11 +20,7 @@
 }
 
 - (void)finishLaunching:(NSNotification *)notification {
-    NSString *usageToken = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Curbside Usage Token"];
-    
-    CSUserSession *sdksession = [CSUserSession createSessionWithUsageToken:usageToken delegate:self];
-    NSDictionary *launchOptions = notification.userInfo;
-    [sdksession application:[UIApplication sharedApplication] didFinishLaunchingWithOptions:launchOptions];
+    [CSUserSession currentSession].delegate = self;
 }
 
 - (NSString*)userStatusEncode:(CSUserStatus)status {
@@ -41,8 +37,10 @@
         case CSUserStatusUserInitiatedArrived:
         return @"userInitiatedArrived";
         break;
+        default:
+        return @"unknown";
+        break;
     }
-    return @"unknown";
 }
 
 - (NSDictionary*)tripEncode:(CSTripInfo *)trip {
@@ -134,7 +132,7 @@
     for (CDVPluginResult* eventResult in _pendingEventResults) {
         [self.commandDelegate sendPluginResult:eventResult callbackId:_eventListenerCallbackId];
     }
-    [_pendingEventResults removeAllObjects]
+    [_pendingEventResults removeAllObjects];
 }
 
 - (void)sendSuccessEvent:(NSString*) event withResult:(id) result {
@@ -159,19 +157,13 @@
 
 - (void)setTrackingIdentifier:(CDVInvokedUrlCommand*)command {
     NSString* trackingIdentifier = [command.arguments objectAtIndex:0];
-    if (trackingIdentifier == nil && [CSUserSession currentSession].trackingIdentifier == nil){
-        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackingIdentifierAlreadyNull"] callbackId:command.callbackId];
-    } else if (trackingIdentifier != nil && [CSUserSession currentSession].trackingIdentifier != nil){
-        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackingIdentifierAlreadySet"] callbackId:command.callbackId];
+    [CSUserSession currentSession].trackingIdentifier = trackingIdentifier;
+    CSSessionState sessionState = [CSUserSession currentSession].sessionState;
+    
+    if (sessionState == CSSessionStateValid || sessionState == CSSessionStateAuthenticated) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
     } else {
-        [CSUserSession currentSession].trackingIdentifier = trackingIdentifier;
-        CSSessionState sessionState = [CSUserSession currentSession].sessionState;
-        
-        if (sessionState == CSSessionStateValid || sessionState == CSSessionStateAuthenticated) {
-            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
-        } else {
-            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
-        }
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self sessionStateEncode:sessionState]] callbackId:command.callbackId];
     }
 }
 
@@ -184,6 +176,8 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"siteID was null"];
     } else if (trackToken == nil) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackToken was null"];
+    } else if ([CSUserSession currentSession].trackingIdentifier == nil) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackingIdentifier was null"];
     } else {
         [[CSUserSession currentSession] startTripToSiteWithIdentifier:siteID trackToken:trackToken];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
