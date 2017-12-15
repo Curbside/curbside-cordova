@@ -12,7 +12,6 @@
     </engines>
     <!-- android -->
     <platform name="android">
-        <preference name="USAGE_TOKEN" />
         <js-module src="www/plugin.js" name="plugin">
             <runs/>
             <clobbers target="Curbside" />
@@ -34,7 +33,6 @@
     </platform>
     <!-- ios -->
     <platform name="ios">
-        <preference name="USAGE_TOKEN" />
         <preference name="LOCATION_WHEN_IN_USE_DESCRIPTION" default="To get accurate GPS locations"/>
         <preference name="LOCATION_ALWAYS_USAGE_DESCRIPTION" default="To get accurate GPS locations" />
         <js-module src="www/plugin.js" name="plugin">
@@ -45,6 +43,9 @@
             <feature name="CurbsideCordovaPlugin">
                 <param name="ios-package" value="CurbsideCordovaPlugin" onload="true" />
             </feature>
+        </config-file>
+        <config-file target="*-Info.plist" parent="NSLocationAlwaysAndWhenInUseUsageDescription">
+            <string>$LOCATION_ALWAYS_USAGE_DESCRIPTION</string>
         </config-file>
         <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
             <string>$LOCATION_WHEN_IN_USE_DESCRIPTION</string>
