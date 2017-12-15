@@ -125,7 +125,7 @@ token and permission notification
     private static final int PERMISSION_REQUEST_CODE = 1;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         CSUserSession.init(this, new TokenCurbsideCredentialProvider(USAGE_TOKEN));
 
@@ -134,7 +134,7 @@ token and permission notification
             String[] permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
         }
-    }
+        ...
 ```
 
 ## Configuration
@@ -223,6 +223,10 @@ document.addEventListener("deviceready", function() {
   Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
 
   });
+  // You can also add date range for the user's intended arrival window.
+  Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", from, to, function(error){
+
+  });
 
   /**
    * Completes the trip for the user to the site identified by the siteID with the given trackToken.
@@ -261,6 +265,19 @@ document.addEventListener("deviceready", function() {
    * Returns an trackingId of the currently tracked user
    */
   Curbside.getTrackedSites(function(error, sites){
+
+  });
+
+  /**
+   * Set userInfo about the user e.g. full name, email and sms number
+   */
+  Curbside.setUserInfo({fullName, emailAddress, smsNumber}, function(error){
+
+  });
+  /**
+   * Returns an userInfo about the user e.g. full name, email and sms number
+   */
+  Curbside.getUserInfo(function(error, userInfo){
 
   });
 });

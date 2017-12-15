@@ -38,8 +38,16 @@ var Curbside = {
         return execCb("setTrackingIdentifier", cb, trackingIdentifier);
     },
 
-    startTripToSiteWithIdentifier: function(siteID, trackToken, cb) {
-        return execCb("startTripToSiteWithIdentifier", cb, siteID, trackToken);
+    setUserInfo: function(userInfo, cb) {
+        return execCb("setUserInfo", cb, userInfo);
+    },
+
+    getUserInfo: function(cb) {
+        return execCb("setUserInfo", cb);
+    },
+
+    startTripToSiteWithIdentifier: function(siteID, trackToken, from, to, cb) {
+        return execCb("startTripToSiteWithIdentifier", cb, siteID, trackToken, from, to);
     },
 
     completeTripToSiteWithIdentifier: function(siteID, trackToken, cb) {
