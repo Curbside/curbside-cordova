@@ -43,7 +43,7 @@ var Curbside = {
     },
 
     getUserInfo: function(cb) {
-        return execCb("setUserInfo", cb);
+        return execCb("getUserInfo", cb);
     },
 
     startTripToSiteWithIdentifier: function(siteID, trackToken, cb) {
