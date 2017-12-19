@@ -18,7 +18,7 @@ _Develop version_
 cordova plugin add https://github.com/Curbside/curbside-cordova.git
 ```
 
-### Ios
+### iOS
 
 In `platforms/ios/YOUR_PROJECT/Classes/AppDelegate.m`
 
@@ -52,9 +52,11 @@ Otherwise you will get
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'Invalid parameter not satisfying: !stayUp || CLClientIsBackgroundable(internal->fClient)'
 ```
 
-#### Fix Podfile ios version
+#### Fixing the Podfile iOS version
 
-If you have this error:
+> We're currently awaiting for one of our fixes to be merged in the Cordova core. Until this is available, this step is needed.
+
+If you are experiencing this error:
 
 ```
 Installing "curbside-cordova" for ios
@@ -68,7 +70,7 @@ Error: pod: Command failed with exit code 1
 ```
 
 In your project, edit the file `platforms/ios/Podfile`. Replace `platform :ios, '8.0'` by `platform :ios,'9.0'` Then in
-a terminal go to `platforms/ios` then execute
+a terminal go to `platforms/ios` and execute
 
 ```bash
 pod install
@@ -76,7 +78,7 @@ pod install
 
 ### Android
 
-Add the Curbside sdk maven url
+Add the Curbside SDK maven url
 
 In your project, edit the file `platforms/android/build.gradle`.
 
@@ -107,7 +109,7 @@ allprojects {
 }
 ```
 
-Otherwise you will get:
+Otherwise, you will experience the following error:
 
 ```
 * What went wrong: A problem occurred configuring root project 'android'.
@@ -117,8 +119,7 @@ Otherwise you will get:
            project :
 ```
 
-In `platforms/android/src/main/java/com/YOUR_PROJECT/MainActivity.java` add your usage
-token and permission notification
+In `platforms/android/src/main/java/com/YOUR_PROJECT/MainActivity.java` add your usage token and permission notification:
 
 ```java
     private static String USAGE_TOKEN = "USAGE_TOKEN";
@@ -163,115 +164,125 @@ Example using config.xml
 </plugin>
 ```
 
-## Quick example
+## Quick Start
 
 ```html
 <script type="text/javascript">
 document.addEventListener("deviceready", function() {
   /**
    * Will be triggered when the user is near a site where the associate can be notified of the user arrival.
-   */
+   **/
   Curbside.on("canNotifyMonitoringSessionUserAtSite", function(site){
     // Do something
-  })
+  });
 
   /**
    * Will be triggered when the user is approaching a site which is currently tracked for a trip.
-   */
+   **/
   Curbside.on("userApproachingSite", function(site){
     // Do something
-  })
+  });
 
   /**
    * Will be triggered when the user has arrived at a site which is currently tracked for a trip.
-   */
+   **/
   Curbside.on("userArrivedAtSite", function(site){
     // Do something
-  })
+  });
 
   /**
-   * Will be triggered when an error encountered.
-   */
+   * Will be triggered when an error is encountered.
+   **/
   Curbside.on("encounteredError", function(error){
     // Do something
-  })
+  });
 
   /**
    * Will be triggered when trackedSites are updated.
-   */
+   **/
   Curbside.on("updatedTrackedSites", function(sites){
     // Do something
-  })
+  });
 
   /**
-   * trackingIdentifier for the user who is logged into the device. This may be nil when the app is started, but as the
-   * user logs into the app, make sure this value is set. trackingIdentifier needs to be set to use session specific methods for starting
-   * trips or monitoring sites. This identifier will be persisted across application restarts.
+   * Set the "USER_UNIQUE_TRACKING_ID" of the user currently logged in your app. This may be nil when the app is
+   * started, but as the user logs into the app, make sure this value is set. trackingIdentifier needs to be set to use
+   * session specific methods for starting trips or monitoring sites. This identifier will be persisted across
+   * application restarts.
    *
-   * When the user logs out, set this to nil, which will inturn end the user session or monitoring session.
+   * When the user logs out, set this to nil, which will in turn end the user session or monitoring session.
    * Note: The maximum length of the trackingIdentifier is 36 characters.
-  */
+   **/
   Curbside.setTrackingIdentifier("USER_UNIQUE_TRACKING_ID", function(error){
 
   });
 
   /**
-   * Start a trip tracking the user to the site identified by the siteID. Call this method when
-   * the application thinks its appropriate to start tracking the user eg. Order is ready to be picked up at
+   * Start a trip tracking the user pickup of "UNIQUE_TRACK_TOKEN" to the site identified by the "SITE_ID". Call this
+   * method when the application thinks its appropriate to start tracking the user eg. Order is ready to be picked up at
    * the site. This information is persisted across relaunch.
-   */
+   *
+   * If an error occurs because of an invalid session state, permissions or authentication with the ARRIVE server,
+   * the callback will be informed with the reason as to why startTripToSiteWithIdentifier failed.
+   **/
   Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
 
   });
 
   /**
-   * Completes the trip for the user to the site identified by the siteID with the given trackToken.
+   * Completes the trip for the user to the site identified by the "SITE_ID" with the given "UNIQUE_TRACK_TOKEN".
    * If no trackToken is specified, then *all* trips to this site  will be completed.
-   * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
-   */
+   *
+   * Note: Do not call this when the user logs out, instead set the "USER_UNIQUE_TRACKING_ID" to nil when the user logs out.
+   **/
   Curbside.completeTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
 
   });
 
   /**
    * This method would complete all trips for this user across all devices.
-   * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
-   */
+   *
+   * Note: Do not call this when the user logs out, instead set the "USER_UNIQUE_TRACKING_ID" to nil when the user logs
+   * out.
+   **/
   curbside.completeAllTrips(function(error){
 
   });
 
   /**
-   * Cancels the trip for the user to the given site identified by the siteID with the given trackToken.
-   * If no trackToken is set, then *all* trips to this site are cancelled.
-   * Note: Do not call this when the user logs out, instead set the trackingIdentifier to nil when the user logs out.
-   */
+   * Cancels the trip for the user to the given site identified by the "SITE_ID" with the given "UNIQUE_TRACK_TOKEN".
+   *
+   * If no "UNIQUE_TRACK_TOKEN" is set, then *ALL* trips to this site are cancelled.
+   *
+   * Note: Do not call this when the user logs out, instead set the "USER_UNIQUE_TRACKING_ID" to nil when the user logs out.
+   **/
   Curbside.cancelTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
 
   });
 
   /**
-   * Returns an trackingId of the currently tracked user
-   */
+   * Returns the "USER_UNIQUE_TRACKING_ID" of the currently tracked user.
+   **/
   Curbside.getTrackingIdentifier(function(error, sites){
 
   });
 
   /**
-   * Returns an trackingId of the currently tracked user
-   */
+   * Returns the list of sites currently tracked by the user.
+   **/
   Curbside.getTrackedSites(function(error, sites){
 
   });
 
   /**
-   * Set userInfo about the user e.g. full name, email and sms number
-   */
+   * Set userInfo e.g. full name, email and sms number
+   **/
   Curbside.setUserInfo({fullName, emailAddress, smsNumber}, function(error){
 
   });
+
   /**
-   * Returns an userInfo about the user e.g. full name, email and sms number
+   * Returns the userInfo e.g. full name, email and sms number
    */
   Curbside.getUserInfo(function(error, userInfo){
 
@@ -282,7 +293,7 @@ document.addEventListener("deviceready", function() {
 
 ### Promise
 
-All functions return a promise as an alternative to a callback.
+All functions return a Promise as an alternative to a callback.
 
 * setTrackingIdentifier
 * startTripToSiteWithIdentifier
@@ -293,7 +304,7 @@ All functions return a promise as an alternative to a callback.
 * getTrackingIdentifier
 * getTrackedSites
 
-Promise can be used like this:
+The Promise can be used like this:
 
 ```js
 Curbside.getTrackedSites
