@@ -9,7 +9,7 @@ This plugin is a wrapper for [Curbside SDK](https://developer.curbside.com/docs/
 _Stable version(npm)_
 
 ```bash
-cordova plugins add curbside-cordova
+cordova plugin add curbside-cordova
 ```
 
 _Develop version_
