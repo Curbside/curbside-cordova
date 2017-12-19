@@ -223,10 +223,6 @@ document.addEventListener("deviceready", function() {
   Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
 
   });
-  // You can also add a date range for the user's intended arrival window.
-  Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", from, to, function(error){
-
-  });
 
   /**
    * Completes the trip for the user to the site identified by the siteID with the given trackToken.

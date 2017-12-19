@@ -209,8 +209,8 @@
     CDVPluginResult* pluginResult = nil;
     NSString* siteID = [command.arguments objectAtIndex:0];
     NSString* trackToken = [command.arguments objectAtIndex:1];
-    NSString* from = [command.arguments objectAtIndex:2];
-    NSString* to = [command.arguments objectAtIndex:3];
+    // NSString* from = [command.arguments objectAtIndex:2];
+    // NSString* to = [command.arguments objectAtIndex:3];
     
     if (siteID == nil) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"siteID was null"];
@@ -219,13 +219,13 @@
     } else if ([CSUserSession currentSession].trackingIdentifier == nil) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"trackingIdentifier was null"];
     } else {
-        if (from == nil || to == nil){
+        // if (from == nil || to == nil){
             [[CSUserSession currentSession] startTripToSiteWithIdentifier:siteID trackToken:trackToken];
-        } else {
-            NSDate *fromDate = [self dateForRFC3339DateTimeString:from];
-            NSDate *toDate = [self dateForRFC3339DateTimeString:to];
-            [[CSUserSession currentSession] startTripToSiteWithIdentifier:siteID trackToken:trackToken etaFromDate:fromDate toDate:toDate]
-        }
+        // } else {
+        //     NSDate *fromDate = [self dateForRFC3339DateTimeString:from];
+        //     NSDate *toDate = [self dateForRFC3339DateTimeString:to];
+        //     [[CSUserSession currentSession] startTripToSiteWithIdentifier:siteID trackToken:trackToken etaFromDate:fromDate toDate:toDate]
+        // }
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -279,15 +279,15 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)getUserInfo:(CDVInvokedUrlCommand*)command {
-    CSUserInfo userInfo = [CSUserSession currentSession].userInfo;
-    CDVPluginResult* pluginResult;
-    if (userInfo != nil) {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self userInfoEncode:userInfo]];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    }
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
+// - (void)getUserInfo:(CDVInvokedUrlCommand*)command {
+//     CSUserInfo userInfo = [CSUserSession currentSession].userInfo;
+//     CDVPluginResult* pluginResult;
+//     if (userInfo != nil) {
+//         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self userInfoEncode:userInfo]];
+//     } else {
+//         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+//     }
+//     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+// }
 
 @end

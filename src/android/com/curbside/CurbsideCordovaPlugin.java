@@ -68,9 +68,10 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
         }
 
         subscribe(Type.CAN_NOTIFY_MONITORING_USER_AT_SITE, "canNotifyMonitoringSessionUserAtSite");
-        subscribe(Type.APPROACHING_SITE, "userApproachingSite");
-        subscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
-        subscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
+
+        //subscribe(Type.APPROACHING_SITE, "userApproachingSite");
+        //subscribe(Type.ARRIVED_AT_SITE, "userArrivedAtSite");
+        //subscribe(Type.UPDATED_TRACKED_SITES, "updatedTrackedSites");
     }
 
     private Object jsonEncode(Object object) throws JSONException {
@@ -117,7 +118,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             result.put("emailAddress", userInfo.getEmailAddress());
             result.put("smsNumber", userInfo.getSmsNumber());
             return result;
-        }
+        } else
         return object;
     }
 
@@ -218,16 +219,16 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             } else if (action.equals("startTripToSiteWithIdentifier")) {
                 String siteID = args.getString(0);
                 String trackToken = args.getString(1);
-                String from = args.getString(2);
-                String to = args.getString(3);
+                // String from = args.getString(2);
+                // String to = args.getString(3);
                 listenNextEvent(Type.START_TRIP, callbackContext);
-                if (from == null || to == null) {
+                // if (from == null || to == null) {
                     CSUserSession.getInstance().startTripToSiteWithIdentifier(siteID, trackToken);
-                } else {
-                    DateTime dtFrom = DateTime.parse(from);
-                    DateTime dtTo = DateTime.parse(to);
-                    CSUserSession.getInstance().startTripToSiteWithIdentifierAndETA(siteID, trackToken, dtFrom, dtTo);
-                }
+                // } else {
+                //     DateTime dtFrom = DateTime.parse(from);
+                //     DateTime dtTo = DateTime.parse(to);
+                //     CSUserSession.getInstance().startTripToSiteWithIdentifierAndETA(siteID, trackToken, dtFrom, dtTo);
+                // }
             } else if (action.equals("completeTripToSiteWithIdentifier")) {
                 String siteID = args.getString(0);
                 String trackToken = args.getString(1);
@@ -249,7 +250,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             } else if (action.equals("getTrackedSites")) {
                 callbackContext.success((JSONObject) jsonEncode(CSUserSession.getInstance().getTrackedSites()));
             } else if (action.equals("getUserInfo")) {
-                callbackContext.success((JSONObject) jsonEncode(CSUserSession.getInstance().getCustomerInfo()));
+                // callbackContext.success((JSONObject) jsonEncode(CSUserSession.getInstance().getCustomerInfo()));
             } else if (action.equals("setUserInfo")) {
                 JSONObject userInfo = args.getJSONObject(0);
                 String fullName = userInfo.has("fullName") ? userInfo.getString("fullName") : null;
@@ -263,5 +264,4 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
         }
         return true;
     }
-
 }
