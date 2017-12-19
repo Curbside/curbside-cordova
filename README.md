@@ -28,7 +28,7 @@ In `platforms/ios/YOUR_PROJECT/Classes/AppDelegate.m`
 @import Curbside;
 ```
 
-* Add at the end of `-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions`
+* At the end of `-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions` add this:
 
 ```objc
   CSUserSession *sdksession = [CSUserSession createSessionWithUsageToken:@"USAGE_TOKEN" delegate:nil];
@@ -76,7 +76,7 @@ pod install
 
 ### Android
 
-Add Curbside sdk maven url
+Add the Curbside sdk maven url
 
 In your project, edit the file `platforms/android/build.gradle`.
 
@@ -117,7 +117,7 @@ Otherwise you will get:
            project :
 ```
 
-In `platforms/android/src/main/java/com/YOUR_PROJECT/MainActivity.java` add your Usage
+In `platforms/android/src/main/java/com/YOUR_PROJECT/MainActivity.java` add your usage
 token and permission notification
 
 ```java
@@ -223,7 +223,7 @@ document.addEventListener("deviceready", function() {
   Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", function(error){
 
   });
-  // You can also add date range for the user's intended arrival window.
+  // You can also add a date range for the user's intended arrival window.
   Curbside.startTripToSiteWithIdentifier("SITE_ID", "UNIQUE_TRACK_TOKEN", from, to, function(error){
 
   });
