@@ -9,9 +9,17 @@
 
 - (void)eventListener:(CDVInvokedUrlCommand*)command;
 
+// session
+
 - (void)setUserInfo:(CDVInvokedUrlCommand*)command;
 
+- (void)getUserInfo:(CDVInvokedUrlCommand*)command;
+
 - (void)setTrackingIdentifier:(CDVInvokedUrlCommand*)command;
+
+- (void)getTrackingIdentifier:(CDVInvokedUrlCommand*)command;
+
+// user session
 
 - (void)startTripToSiteWithIdentifier:(CDVInvokedUrlCommand*)command;
 
@@ -25,10 +33,16 @@
 
 - (void)cancelAllTrips:(CDVInvokedUrlCommand*)command;
 
-- (void)getTrackingIdentifier:(CDVInvokedUrlCommand*)command;
-
 - (void)getTrackedSites:(CDVInvokedUrlCommand*)command;
 
-- (void)getUserInfo:(CDVInvokedUrlCommand*)command;
+// monitoring session
+
+- (void)completeTripForTrackingIdentifier:(CDVInvokedUrlCommand*)command;
+
+- (void)cancelTripForTrackingIdentifier:(CDVInvokedUrlCommand*)command;
+
+- (void)startMonitoringArrivalsToSiteWithIdentifier:(CDVInvokedUrlCommand*)command;
+
+- (void)stopMonitoringArrivals:(CDVInvokedUrlCommand*)command;
 
 @end
