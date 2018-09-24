@@ -359,7 +359,7 @@ document.addEventListener("deviceready", function() {
   /**
    * Returns the "USER_UNIQUE_TRACKING_ID" of the currently tracked user.
    **/
-  Curbside.getTrackingIdentifier(function(error, sites){
+  Curbside.getTrackingIdentifier(function(error, trackingIdentifier){
 
   });
 
@@ -409,6 +409,13 @@ document.addEventListener("deviceready", function() {
    * Note: The maximum length of the trackingIdentifier is 36 characters.
    **/
   Curbside.setTrackingIdentifier("USER_UNIQUE_TRACKING_ID", function(error){
+
+  });
+
+  /**
+   * Returns the "USER_UNIQUE_TRACKING_ID" of the currently tracked user.
+   **/
+  Curbside.getTrackingIdentifier(function(error, trackingIdentifier){
 
   });
 
