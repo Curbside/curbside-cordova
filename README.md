@@ -39,7 +39,7 @@ In `platforms/ios/YOUR_PROJECT/Classes/AppDelegate.m`
 
 #### Monitoring Session
 
-If your app never request location, In `platforms/ios/YOUR_PROJECT/Classes/AppDelegate.m` in `-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions` add this:
+If your app does not already request location, In `platforms/ios/YOUR_PROJECT/Classes/AppDelegate.m` in `-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions` add this:
 
 ```objc
     CSMonitoringSession *sdksession = [CSMonitoringSession createSessionWithAPIKey:@"APIKey" secret:@"secret" delegate:nil];
