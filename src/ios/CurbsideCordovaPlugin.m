@@ -5,17 +5,17 @@
 @import Curbside;
 
 @interface CurbsideCordovaPlugin () <CSUserSessionDelegate, CSMonitoringSessionDelegate, CLLocationManagerDelegate>
-{
-    NSString* _eventListenerCallbackId;
-    NSMutableArray<CDVPluginResult*>* _pendingEventResults;
-    NSMutableArray<NSString*>* _locationRequestCallbackId;
-    CLLocationManager *_locationManager;
-}
-
-@end
+    {
+        NSString* _eventListenerCallbackId;
+        NSMutableArray<CDVPluginResult*>* _pendingEventResults;
+        NSMutableArray<NSString*>* _locationRequestCallbackId;
+        CLLocationManager *_locationManager;
+    }
+    
+    @end
 
 @implementation CurbsideCordovaPlugin
-
+    
 - (NSString*)getStringArg: (NSArray*)arguments at:(int)index{
     id obj = [arguments objectAtIndex:index];
     if(!obj || obj == [NSNull null]){
@@ -23,7 +23,7 @@
     }
     return obj;
 }
-
+    
 - (NSArray<NSString *> *)getArrayArg: (NSArray*)arguments at:(int)index{
     id obj = [arguments objectAtIndex:index];
     if(!obj || obj == [NSNull null]){
@@ -31,13 +31,13 @@
     }
     return obj;
 }
-
+    
 - (void)pluginInitialize {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishLaunching:) name:UIApplicationDidFinishLaunchingNotification object:nil];
     _pendingEventResults = [[NSMutableArray alloc] init];
     _locationRequestCallbackId = [[NSMutableArray alloc] init];
 }
-
+    
 - (void)finishLaunching:(NSNotification *)notification {
     CSUserSession* userSession = [CSUserSession currentSession];
     if(userSession != nil){
@@ -51,36 +51,36 @@
         };
     }
 }
-
-// utils
-
+    
+    // utils
+    
 - (NSNumber*)dateEncode:(NSDate*)date {
     if(date == nil){
         return nil;
     }
     return [NSNumber numberWithDouble:[date timeIntervalSince1970]];
 }
-
+    
 - (NSString*)userStatusEncode:(CSUserStatus)status {
     switch(status) {
         case CSUserStatusArrived:
-            return @"arrived";
-            break;
+        return @"arrived";
+        break;
         case CSUserStatusInTransit:
-            return @"inTransit";
-            break;
+        return @"inTransit";
+        break;
         case CSUserStatusApproaching:
-            return @"approaching";
-            break;
+        return @"approaching";
+        break;
         case CSUserStatusUserInitiatedArrived:
-            return @"userInitiatedArrived";
-            break;
+        return @"userInitiatedArrived";
+        break;
         default:
-            return @"unknown";
-            break;
+        return @"unknown";
+        break;
     }
 }
-
+    
 - (NSDictionary*)tripEncode:(CSTripInfo *)trip {
     NSMutableDictionary *encodedTrip = [[NSMutableDictionary alloc] init];
     [encodedTrip setValue:trip.trackToken forKey:@"trackToken"];
@@ -88,7 +88,7 @@
     [encodedTrip setValue:trip.destID forKey:@"destID"];
     return encodedTrip;
 }
-
+    
 - (NSArray*)tripsEncode:(NSArray<CSTripInfo *> *)trips {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     NSEnumerator<CSTripInfo*> *enumerator = [trips objectEnumerator];
@@ -99,7 +99,7 @@
     }
     return result;
 }
-
+    
 - (NSDictionary*)siteEncode:(CSSite *)site {
     NSMutableDictionary *encodedSite = [[NSMutableDictionary alloc] init];
     [encodedSite setValue:site.siteIdentifier forKey:@"siteIdentifier"];
@@ -108,7 +108,7 @@
     [encodedSite setValue:[self tripsEncode:site.tripInfos] forKey:@"trips"];
     return encodedSite;
 }
-
+    
 - (NSArray*)sitesEncode:(NSSet<CSSite *> *)sites {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     NSEnumerator<CSSite*> *enumerator = [sites objectEnumerator];
@@ -119,7 +119,7 @@
     }
     return result;
 }
-
+    
 - (NSDictionary*)userInfoEncode:(CSUserInfo *)userInfo {
     NSMutableDictionary *encodedUserInfo = [[NSMutableDictionary alloc] init];
     [encodedUserInfo setValue:userInfo.fullName forKey:@"fullName"];
@@ -130,51 +130,51 @@
     [encodedUserInfo setValue:userInfo.vehicleLicensePlate forKey:@"vehicleLicensePlate"];
     return encodedUserInfo;
 }
-
+    
 - (NSString*) sessionStateEncode:(CSSessionState)sessionState {
     switch(sessionState) {
         case CSSessionStateUsageTokenNotSet:
-            return @"usageTokenNotSet";
-            break;
+        return @"usageTokenNotSet";
+        break;
         case CSSessionStateInvalidKeys:
-            return @"invalidKeys";
-            break;
+        return @"invalidKeys";
+        break;
         case CSSessionStateAuthenticated:
-            return @"authenticated";
-            break;
+        return @"authenticated";
+        break;
         case CSSessionStateValid:
-            return @"valid";
-            break;
+        return @"valid";
+        break;
         case CSSessionStateNetworkError:
-            return @"networkError";
-            break;
+        return @"networkError";
+        break;
         default:
-            return @"unknown";
-            break;
+        return @"unknown";
+        break;
     }
 }
-
-
+    
+    
 - (NSString*) motionAcivityEncode:(CSMotionActivity)motionAcivity {
     switch(motionAcivity) {
-        case CSMotionActivityInVehicle:      
-            return @"inVehicle";
-            break;
+        case CSMotionActivityInVehicle:
+        return @"inVehicle";
+        break;
         case CSMotionActivityOnBicycle:
-            return @"onBicycle";
-            break;
+        return @"onBicycle";
+        break;
         case CSMotionActivityOnFoot:
-            return @"onFoot";
-            break;
+        return @"onFoot";
+        break;
         case CSMotionActivityStill:
-            return @"still";
-            break;
+        return @"still";
+        break;
         default:
-            return @"unknown";
-            break;
+        return @"unknown";
+        break;
     }
 }
-
+    
 - (NSDictionary*)locationEncode:(CLLocation *)location {
     NSMutableDictionary *encodedLocation = [[NSMutableDictionary alloc] init];
     [encodedLocation setValue:[NSNumber numberWithDouble:location.altitude] forKey:@"altitude"];
@@ -182,19 +182,21 @@
     if(location.floor != nil){
         [encodedLocation setValue:[NSNumber numberWithInteger:location.floor.level] forKey:@"floor"];
     }
-    [encodedCoordinate setValue:[NSNumber numberWithDouble:location.coordinate.latitude] forKey:@"latitude"];
-    [encodedCoordinate setValue:[NSNumber numberWithDouble:location.coordinate.longitude] forKey:@"longitude"];
+    [encodedLocation setValue:[NSNumber numberWithDouble:location.coordinate.latitude] forKey:@"latitude"];
+    [encodedLocation setValue:[NSNumber numberWithDouble:location.coordinate.longitude] forKey:@"longitude"];
     [encodedLocation setValue:[NSNumber numberWithDouble:location.horizontalAccuracy] forKey:@"horizontalAccuracy"];
     [encodedLocation setValue:[NSNumber numberWithDouble:location.speed] forKey:@"speed"];
     [encodedLocation setValue:[NSNumber numberWithDouble:location.course] forKey:@"course"];
     [encodedLocation setValue:[self dateEncode:location.timestamp] forKey:@"timestamp"];
     return encodedLocation;
 }
-
+    
 - (NSDictionary*)userStatusUpdateEncode:(CSUserStatusUpdate *)userStatusUpdate {
     NSMutableDictionary *encodedUserStatusUpdate = [[NSMutableDictionary alloc] init];
     [encodedUserStatusUpdate setValue:userStatusUpdate.trackingIdentifier forKey:@"trackingIdentifier"];
-    [encodedUserStatusUpdate setValue:[self locationEncode:userStatusUpdate.location] forKey:@"location"];
+    if(userStatusUpdate.location != nil){
+        [encodedUserStatusUpdate setValue:[self locationEncode:userStatusUpdate.location] forKey:@"location"];
+    }
     [encodedUserStatusUpdate setValue:[self dateEncode:userStatusUpdate.lastUpdateTimestamp] forKey:@"lastUpdateTimestamp"];
     [encodedUserStatusUpdate setValue:[self userStatusEncode:userStatusUpdate.userStatus] forKey:@"userStatus"];
     [encodedUserStatusUpdate setValue:[self userInfoEncode:userStatusUpdate.userInfo] forKey:@"userInfo"];
@@ -211,7 +213,7 @@
     }
     return encodedUserStatusUpdate;
 }
-
+    
 - (NSArray*)userStatusUpdatesEncode:(NSArray<CSUserStatusUpdate *> *)userStatusUpdates {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     
@@ -223,7 +225,7 @@
     }
     return result;
 }
-
+    
 -(NSDate*)dateForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString {
     if(rfc3339DateTimeString == nil){
         return nil;
@@ -238,7 +240,7 @@
     NSDate *result = [rfc3339DateFormatter dateFromString:rfc3339DateTimeString];
     return result;
 }
-
+    
 - (void)eventListener:(CDVInvokedUrlCommand*)command {
     _eventListenerCallbackId = command.callbackId;
     for (CDVPluginResult* eventResult in _pendingEventResults) {
@@ -246,31 +248,37 @@
     }
     [_pendingEventResults removeAllObjects];
 }
-
+    
 - (void)sendSuccessEvent:(NSString*) event withResult:(id) result {
     NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
     [message setValue:event forKey:@"event"];
     [message setValue:result forKey:@"result"];
     CDVPluginResult* eventResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+    [eventResult setKeepCallbackAsBool:YES];
     if (_eventListenerCallbackId == nil) {
         [_pendingEventResults addObject:eventResult];
     } else {
         [self.commandDelegate sendPluginResult:eventResult callbackId:_eventListenerCallbackId];
     }
 }
-
+    
 - (void)sendErrorEvent:(NSString*) error {
     NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
     [message setValue:error forKey:@"result"];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:message];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:_eventListenerCallbackId];
+    [pluginResult setKeepCallbackAsBool:YES];
+    if (_eventListenerCallbackId == nil) {
+        [_pendingEventResults addObject:pluginResult];
+    } else {
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:_eventListenerCallbackId];
+    }
 }
-
-// Session
+    
+    // Session
 - (void)session:(CSSession *)session changedState:(CSSessionState)newState {
     [self sendSuccessEvent:@"changedState" withResult:[self sessionStateEncode:newState]];
 }
-
+    
 - (CSSession*)getSession {
     CSUserSession* userSession = [CSUserSession currentSession];
     if(userSession != nil){
@@ -279,7 +287,7 @@
     CSMonitoringSession* monitoringSession = [CSMonitoringSession currentSession];
     return monitoringSession;
 }
-
+    
 - (void)setTrackingIdentifier:(CDVInvokedUrlCommand*)command {
     NSString* trackingIdentifier = [self getStringArg:command.arguments at:0];
     
@@ -297,7 +305,7 @@
         }
     }
 }
-
+    
 - (void)getTrackingIdentifier:(CDVInvokedUrlCommand*)command {
     CSSession* session = [self getSession];
     if(session == nil){
@@ -307,8 +315,8 @@
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
-
-
+    
+    
 - (void)setUserInfo:(CDVInvokedUrlCommand*)command {
     NSDictionary* arguments = [command.arguments objectAtIndex:0];
     
@@ -338,7 +346,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)getUserInfo:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     CSSession* session = [self getSession];
@@ -354,31 +362,31 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
-
-// User Session
-
+    
+    
+    // User Session
+    
 - (void)session:(CSUserSession *)session canNotifyMonitoringSessionUserAtSite:(CSSite *)site {
     [self sendSuccessEvent:@"canNotifyMonitoringSessionUserAtSite" withResult:[self siteEncode:site]];
 }
-
+    
 - (void)session:(CSUserSession *)session userApproachingSite:(CSSite *)site {
     [self sendSuccessEvent:@"userApproachingSite" withResult:[self siteEncode:site]];
 }
-
+    
 - (void)session:(CSUserSession *)session userArrivedAtSite:(CSSite *)site {
     [self sendSuccessEvent:@"userArrivedAtSite" withResult:[self siteEncode:site]];
 }
-
+    
 - (void)session:(CSUserSession *)session encounteredError:(NSError *)error forOperation:(CSUserSessionAction)customerSessionAction {
     [self sendErrorEvent:error.description];
 }
-
+    
 - (void)session:(CSUserSession *)session updatedTrackedSites:(NSSet<CSSite *> *)trackedSites {
     [self sendSuccessEvent:@"updatedTrackedSites" withResult:[self sitesEncode:trackedSites]];
 }
-
-
+    
+    
 - (void)startTripToSiteWithIdentifier:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* siteID = [self getStringArg:command.arguments at:0];
@@ -399,7 +407,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 -(void)startTripToSiteWithIdentifierAndEta:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* siteID = [self getStringArg:command.arguments at:0];
@@ -426,7 +434,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)completeTripToSiteWithIdentifier:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* siteID = [self getStringArg:command.arguments at:0];
@@ -444,7 +452,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)completeAllTrips:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     CSUserSession* session = [CSUserSession currentSession];
@@ -456,7 +464,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)cancelTripToSiteWithIdentifier:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* siteID = [self getStringArg:command.arguments at:0];
@@ -473,7 +481,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)cancelAllTrips:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     CSUserSession* session = [CSUserSession currentSession];
@@ -485,7 +493,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)getTrackedSites:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     CSUserSession* session = [CSUserSession currentSession];
@@ -496,13 +504,13 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
-// Monitoring Sesion
-
+    
+    // Monitoring Sesion
+    
 - (void)session:(nonnull CSMonitoringSession *)session encounteredError:(nonnull NSError *)error {
     [self sendErrorEvent:error.description];
 }
-
+    
 - (void) startMonitoringArrivalsToSiteWithIdentifier:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* siteID = [self getStringArg:command.arguments at:0];
@@ -518,7 +526,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void) stopMonitoringArrivals:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     
@@ -531,7 +539,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)completeTripForTrackingIdentifier:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* trackingIdentifier = [self getStringArg:command.arguments at:0];
@@ -548,7 +556,7 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+    
 - (void)cancelTripForTrackingIdentifier:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString* trackingIdentifier = [self getStringArg:command.arguments at:0];
@@ -565,4 +573,4 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-@end
+    @end

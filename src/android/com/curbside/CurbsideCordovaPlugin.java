@@ -392,7 +392,6 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                 String fullName = userInfoData.has("fullName") ? userInfoData.getString("fullName") : null;
                 String emailAddress = userInfoData.has("emailAddress") ? userInfoData.getString("emailAddress") : null;
                 String smsNumber = userInfoData.has("smsNumber") ? userInfoData.getString("smsNumber") : null;
-
                 String vehicleMake = userInfoData.has("vehicleMake") ? userInfoData.getString("vehicleMake") : null;
                 String vehicleModel = userInfoData.has("vehicleModel") ? userInfoData.getString("vehicleModel") : null;
                 String vehicleLicensePlate = userInfoData.has("vehicleLicensePlate")
@@ -401,7 +400,6 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
 
                 CSUserInfo userInfo = new CSUserInfo(fullName, emailAddress, smsNumber, vehicleMake, vehicleModel,
                         vehicleLicensePlate);
-
                 CSUserSession.getInstance().setUserInfo(userInfo);
                 callbackContext.success();
             } else if (action.equals("completeTripForTrackingIdentifier")) {
