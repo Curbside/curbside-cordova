@@ -3,6 +3,7 @@ var exec = require("cordova/exec");
 var PLUGIN_NAME = "CurbsideCordovaPlugin";
 
 var eventListeners = {
+    userStatusUpdates: [],
     canNotifyMonitoringSessionUserAtSite: [],
     userApproachingSite: [],
     userArrivedAtSite: [],
@@ -76,6 +77,26 @@ var Curbside = {
 
     getTrackedSites: function(cb) {
         return execCb("getTrackedSites", cb);
+    },
+
+    getEtaToSiteWithIdentifier: function(siteId, location, transportationMode, cb) {
+        return execCb("getEtaToSiteWithIdentifier", cb, siteId, location, transportationMode);
+    },
+
+    completeTripForTrackingIdentifier: function(trackingIdentifier, trackTokens, cb) {
+        return execCb("completeTripForTrackingIdentifier", cb, trackingIdentifier, trackTokens);
+    },
+
+    cancelTripForTrackingIdentifier: function(trackingIdentifier, trackTokens, cb) {
+        return execCb("cancelTripForTrackingIdentifier", cb, trackingIdentifier, trackTokens);
+    },
+
+    startMonitoringArrivalsToSiteWithIdentifier: function(siteID, cb) {
+        return execCb("startMonitoringArrivalsToSiteWithIdentifier", cb, siteID);
+    },
+
+    stopMonitoringArrivals: function(cb) {
+        return execCb("stopMonitoringArrivals", cb);
     },
 
     on: function(event, listener) {

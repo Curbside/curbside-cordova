@@ -3,7 +3,10 @@
     "version": "3.2.1",
     "cordova": {
         "id": "curbside-cordova",
-        "platforms": ["android", "ios"]
+        "platforms": [
+            "android",
+            "ios"
+        ]
     },
     "scripts": {},
     "description": "Curbside Cordova Plugin",
