@@ -395,7 +395,7 @@ document.addEventListener("deviceready", function() {
    /**
    * Will be triggered when user status updates are sent to the consuming application.
    **/
-  Curbside.on("updatedTrackedSites", function(UserStatusUpdates){
+  Curbside.on("userStatusUpdates", function(UserStatusUpdates){
     // Do something
   });
 

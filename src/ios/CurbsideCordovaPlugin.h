@@ -35,6 +35,8 @@
 
 - (void)getTrackedSites:(CDVInvokedUrlCommand*)command;
 
+- (void)getEtaToSiteWithIdentifier:(CDVInvokedUrlCommand*)command;
+
 // monitoring session
 
 - (void)completeTripForTrackingIdentifier:(CDVInvokedUrlCommand*)command;

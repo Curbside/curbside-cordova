@@ -8,6 +8,7 @@ import com.curbside.sdk.CSMonitoringSession;
 import com.curbside.sdk.CSMotionActivity;
 import com.curbside.sdk.CSSession;
 import com.curbside.sdk.CSSite;
+import com.curbside.sdk.CSTransportationMode;
 import com.curbside.sdk.CSTripInfo;
 import com.curbside.sdk.CSUserSession;
 import com.curbside.sdk.CSUserStatus;
@@ -91,6 +92,27 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             return null;
         }
         return value;
+    }
+
+    private Location getLocationArg(JSONArray args, int i) {
+        Location location;
+        try {
+            JSONObject jsonValue = args.getJSONObject(i);
+            if (jsonValue.equals("null")) {
+                return null;
+            }
+            location = new Location("JsonProvider");
+            location.setAltitude(jsonValue.getDouble("altitude"));
+            location.setAccuracy((float) jsonValue.getDouble("horizontalAccuracy"));
+            location.setSpeed((float) jsonValue.getDouble("speed"));
+            location.setBearing((float) jsonValue.getDouble("course"));
+            location.setTime(jsonValue.getLong("timestamp"));
+            location.setLatitude(jsonValue.getDouble("latitude"));
+            location.setLongitude(jsonValue.getDouble("longitude"));
+        } catch (JSONException e) {
+            return null;
+        }
+        return location;
     }
 
     private Object jsonEncode(Object object) throws JSONException {
@@ -253,6 +275,7 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
             case ARRIVED_AT_SITE:
             case UPDATED_TRACKED_SITES:
             case UPDATE_TRIP:
+            case ETA_FROM_SITE:
                 callbackContext.error("CSUserSession must be initialized");
                 break;
             case START_MONITORING_ARRIVALS:
@@ -402,6 +425,13 @@ public class CurbsideCordovaPlugin extends CordovaPlugin {
                         vehicleLicensePlate);
                 CSUserSession.getInstance().setUserInfo(userInfo);
                 callbackContext.success();
+            } else if (action.equals("getEtaToSiteWithIdentifier")) {
+                String siteID = this.getStringArg(args, 0);
+                Location location = this.getLocationArg(args, 1);
+                CSTransportationMode transportationMode = CSTransportationMode.valueOf(this.getStringArg(args, 2));
+                CSUserSession userSession = CSUserSession.getInstance();
+                listenNextEvent(userSession, Type.ETA_FROM_SITE, callbackContext);
+                userSession.getEtaToSiteWithIdentifier(siteID, location, transportationMode);
             } else if (action.equals("completeTripForTrackingIdentifier")) {
                 CSMonitoringSession monitoringSession = CSMonitoringSession.getInstance();
                 String trackingIdentifier = this.getStringArg(args, 0);
