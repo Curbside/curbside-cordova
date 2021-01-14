@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin 
-    xmlns="http://apache.org/cordova/ns/plugins/1.0" id="curbside-cordova" version="3.5.3">
+    xmlns="http://apache.org/cordova/ns/plugins/1.0" id="curbside-cordova" version="3.5.5">
     <name>Cordova Plugin Template</name>
     <description></description>
     <license>MIT</license>
@@ -64,6 +64,6 @@
         </config-file>
         <header-file src="src/ios/CurbsideCordovaPlugin.h" />
         <source-file src="src/ios/CurbsideCordovaPlugin.m" />
-        <framework src="Curbside" type="podspec" spec="~> 3.5.1" />
+        <framework src="Curbside" type="podspec" spec="~> 3.51" />
     </platform>
 </plugin>

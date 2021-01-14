@@ -1,6 +1,6 @@
 {
     "name": "curbside-cordova",
-    "version": "3.5.3",
+    "version": "3.5.5",
     "cordova": {
         "id": "curbside-cordova",
         "platforms": [
